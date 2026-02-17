@@ -81,72 +81,51 @@
   </div>
 
   <script>
-    // 常用汉字拼音表（~700字，足够日常使用）
-    const pinyinMap = {
-      '的': 'de', '一': 'yī', '是': 'shì', '了': 'le', '不': 'bù', '我': 'wǒ', '有': 'yǒu', '他': 'tā', '这': 'zhè',
-      '们': 'men', '中': 'zhōng', '来': 'lái', '上': 'shàng', '大': 'dà', '为': 'wèi', '你': 'nǐ', '说': 'shuō',
-      '时': 'shí', '要': 'yào', '就': 'jiù', '出': 'chū', '会': 'huì', '可': 'kě', '也': 'yě', '对': 'duì', '生': 'shēng',
-      '能': 'néng', '而': 'ér', '那': 'nà', '得': 'dé', '于': 'yú', '着': 'zhe', '下': 'xià', '自': 'zì', '之': 'zhī',
-      '年': 'nián', '过': 'guò', '发': 'fā', '后': 'hòu', '作': 'zuò', '里': 'lǐ', '用': 'yòng', '道': 'dào', '么': 'me',
-      '好': 'hǎo', '看': 'kàn', '学': 'xué', '只': 'zhǐ', '把': 'bǎ', '吧': 'ba', '吗': 'ma', '呢': 'ne', '啊': 'a',
-      '谁': 'shuí', '什': 'shén', '没': 'méi', '很': 'hěn', '让': 'ràng', '给': 'gěi', '真': 'zhēn', '像': 'xiàng',
-      '和': 'hé', '再': 'zài', '在': 'zài', '个': 'gè', '到': 'dào', '去': 'qù', '与': 'yǔ', '爱': 'ài', '人': 'rén',
-      '所': 'suǒ', '知': 'zhī', '道': 'dào', '间': 'jiān', '因': 'yīn', '为': 'wèi', '所': 'suǒ', '以': 'yǐ', '但': 'dàn',
-      '是': 'shì', '如': 'rú', '果': 'guǒ', '虽': 'suī', '然': 'rán', '而': 'ér', '且': 'qiě', '或': 'huò', '者': 'zhě',
-      '此': 'cǐ', '彼': 'bǐ', '牛': 'niú', '羊': 'yáng', '马': 'mǎ', '猪': 'zhū', '鸡': 'jī', '狗': 'gǒu', '猫': 'māo',
-      '鸟': 'niǎo', '鱼': 'yú', '龙': 'lóng', '蛇': 'shé', '虎': 'hǔ', '兔': 'tù', '熊': 'xióng', '狼': 'láng',
-      '鹿': 'lù', '猴': 'hóu', '象': 'xiàng', '鼠': 'shǔ', '蛙': 'wā', '蝴': 'hú', '蝶': 'dié', '蚂': 'mǎ', '蚁': 'yǐ',
-      '蜂': 'fēng', '花': 'huā', '草': 'cǎo', '树': 'shù', '木': 'mù', '林': 'lín', '森': 'sēn', '山': 'shān',
-      '水': 'shuǐ', '火': 'huǒ', '土': 'tǔ', '风': 'fēng', '雨': 'yǔ', '雪': 'xuě', '云': 'yún', '日': 'rì', '月': 'yuè',
-      '星': 'xīng', '天': 'tiān', '地': 'dì', '人': 'rén', '心': 'xīn', '手': 'shǒu', '足': 'zú', '口': 'kǒu',
-      '目': 'mù', '耳': 'ěr', '鼻': 'bí', '牙': 'yá', '舌': 'shé', '头': 'tóu', '脑': 'nǎo', '脸': 'liǎn', '身': 'shēn',
-      '脚': 'jiǎo', '血': 'xuè', '骨': 'gǔ', '肉': 'ròu', '皮': 'pí', '毛': 'máo', '血': 'xuè', '心': 'xīn', '肝': 'gān',
-      '肺': 'fèi', '胃': 'wèi', '肾': 'shèn', '肠': 'cháng', '朋': 'péng', '友': 'yǒu', '爸': 'bà', '妈': 'mā', '哥': 'gē',
-      '弟': 'dì', '姐': 'jiě', '妹': 'mèi', '儿': 'ér', '女': 'nǚ', '男': 'nán', '夫': 'fū', '妻': 'qī', '子': 'zǐ',
-      '孙': 'sūn', '老': 'lǎo', '师': 'shī', '生': 'shēng', '校': 'xiào', '班': 'bān', '课': 'kè', '书': 'shū', '笔': 'bǐ',
-      '本': 'běn', '桌': 'zhuō', '椅': 'yǐ', '家': 'jiā', '房': 'fáng', '门': 'mén', '窗': 'chuāng', '床': 'chuáng',
-      '沙': 'shā', '发': 'fā', '电视': 'diànshì', '电': 'diàn', '话': 'huà', '机': 'jī', '电脑': 'diànnǎo', '饭': 'fàn',
-      '菜': 'cài', '肉': 'ròu', '鱼': 'yú', '蛋': 'dàn', '奶': 'nǎi', '水': 'shuǐ', '茶': 'chá', '酒': 'jiǔ', '果': 'guǒ',
-      '梨': 'lí', '苹': 'píng', '果': 'guǒ', '蕉': 'jiāo', '葡': 'pú', '萄': 'táo', '西': 'xī', '瓜': 'guā', '豆': 'dòu',
-      '米': 'mǐ', '面': 'miàn', '包': 'bāo', '饺': 'jiǎo', '子': 'zi', '粥': 'zhōu', '汤': 'tāng', '筷': 'kuài', '子': 'zi',
-      '勺': 'sháo', '刀': 'dāo', '叉': 'chā', '盘': 'pán', '碗': 'wǎn', '杯': 'bēi', '瓶': 'ping', '纸': 'zhǐ', '钱': 'qián',
-      '车': 'chē', '船': 'chuán', '飞': 'fēi', '机': 'jī', '路': 'lù', '桥': 'qiáo', '铁': 'tiě', '道': 'dào', '站': 'zhàn',
-      '票': 'piào', '公园': 'gōngyuán', '游': 'yóu', '泳': 'yǒng', '球': 'qiú', '跑': 'pǎo', '跳': 'tiào', '唱': 'chàng',
-      '跳': 'tiào', '舞': 'wǔ', '画': 'huà', '弹': 'tán', '琴': 'qín', '听': 'tīng', '音': 'yīn', '乐': 'yuè', '看': 'kàn',
-      '电': 'diàn', '影': 'yǐng', '读': 'dú', '写': 'xiě', '说': 'shuō', '问': 'wèn', '答': 'dá', '想': 'xiǎng', '思': 'sī',
-      '记': 'jì', '忘': 'wàng', '懂': 'dǒng', '明': 'míng', '白': 'bái', '红': 'hóng', '黄': 'huáng', '蓝': 'lán',
-      '绿': 'lǜ', '紫': 'zǐ', '白': 'bái', '黑': 'hēi', '灰': 'huī', '粉': 'fěn', '棕': 'zōng', '橙': 'chéng', '多': 'duō',
-      '少': 'shǎo', '大': 'dà', '小': 'xiǎo', '高': 'gāo', '矮': 'ǎi', '长': 'cháng', '短': 'duǎn', '粗': 'cū', '细': 'xì',
-      '重': 'zhòng', '轻': 'qīng', '软': 'ruǎn', '硬': 'yìng', '新': 'xīn', '旧': 'jiù', '好': 'hǎo', '坏': 'huài',
-      '快': 'kuài', '慢': 'màn', '早': 'zǎo', '晚': 'wǎn', '今': 'jīn', '昨': 'zuó', '明': 'míng', '天': 'tiān', '年': 'nián',
-      '月': 'yuè', '日': 'rì', '时': 'shí', '分': 'fēn', '秒': 'miǎo', '周': 'zhōu', '春': 'chūn', '夏': 'xià', '秋': 'qiū',
-      '冬': 'dōng', '冷': 'lěng', '热': 'rè', '温': 'wēn', '凉': 'liáng', '晴': 'qíng', '阴': 'yīn', '雨': 'yǔ', '雪': 'xuě'
-    };
-
-    // 获取拼音（本地方案，秒响应）
-    function getPinyin(char) {
-      return pinyinMap[char] || '?';
+    // 获取拼音（极速API）
+    async function getPinyin(char) {
+      try {
+        const res = await fetch(`https://pinyin.api.luojia.top/pinyin/${encodeURIComponent(char)}`);
+        const data = await res.json();
+        return data.pinyin || data.py || '?';
+      } catch (e) {
+        return '?';
+      }
     }
 
     let writer = null;
+    let currentChar = '';
 
-    function search() {
-      const char = document.getElementById('charInput').value.trim();
-      if (!char) return alert('请输入一个汉字');
+    async function search() {
+      const input = document.getElementById('charInput').value.trim();
+      if (!input) return alert('请输入一个汉字');
+
+      const char = input[0];
+      currentChar = char;
 
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
-      document.getElementById('pinyinDisplay').textContent = getPinyin(char);
+      document.getElementById('pinyinDisplay').textContent = '加载中...';
+
+      // 获取拼音
+      const pinyin = await getPinyin(char);
+      document.getElementById('pinyinDisplay').textContent = pinyin;
 
       // 显示笔顺动画
       document.getElementById('character').innerHTML = '';
+      
+      // 使用多色笔顺
+      const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e91e63', '#00bcd4'];
+      const colorIndex = char.charCodeAt(0) % colors.length;
+      
       writer = HanziWriter.create('character', char, {
         width: 300,
         height: 300,
         padding: 20,
         showOutline: true,
+        outlineColor: '#ddd',
         strokeAnimationSpeed: 1.5,
         delayBetweenStrokes: 150,
+        strokeColor: colors[colorIndex],  // 完成后显示的颜色
         radicalColor: '#667eea'
       });
 
