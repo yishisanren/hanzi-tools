@@ -126,7 +126,10 @@
 
     function animate() {
       if (writer) {
-        writer.animateCharacter();
+        writer.hideCharacter();
+        setTimeout(() => {
+          writer.animateCharacter();
+        }, 300);
       }
     }
 
