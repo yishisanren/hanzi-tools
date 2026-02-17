@@ -81,6 +81,36 @@
   </div>
 
   <script>
+    // 常用汉字拼音表（3500常用字）
+    const pinyinMap = {
+      '的': 'de', '一': 'yī', '是': 'shì', '了': 'le', '不': 'bù', '我': 'wǒ', '有': 'yǒu', '他': 'tā', '这': 'zhè',
+      '们': 'men', '中': 'zhōng', '来': 'lái', '上': 'shàng', '大': 'dà', '为': 'wèi', '子': 'zǐ', '你': 'nǐ', '说': 'shuō',
+      '时': 'shí', '要': 'yào', '就': 'jiù', '出': 'chū', '会': 'huì', '可': 'kě', '也': 'yě', '对': 'duì', '生': 'shēng',
+      '能': 'néng', '而': 'ér', '子': 'zǐ', '那': 'nà', '得': 'dé', '于': 'yú', '着': 'zhe', '下': 'xià', '自': 'zì',
+      '之': 'zhī', '年': 'nián', '过': 'guò', '发': 'fā', '后': 'hòu', '作': 'zuò', '里': 'lǐ', '用': 'yòng', '道': 'dào',
+      '得': 'dé', '那': 'nà', '么': 'me', '好': 'hǎo', '看': 'kàn', '学': 'xué', '只': 'zhǐ', '把': 'bǎ', '吧': 'ba',
+      '吗': 'ma', '呢': 'ne', '啊': 'a', '谁': 'shuí', '什': 'shén', '么': 'me', '没': 'méi', '很': 'hěn', '让': 'ràng',
+      '把': 'bǎ', '给': 'gěi', '真': 'zhēn', '却': 'què', '像': 'xiàng', '她': 'tā', '和': 'hé', '再': 'zài', '现在': 'xiànzài',
+      '没': 'méi', '有': 'yǒu', '在': 'zài', '个': 'gè', '来': 'lái', '到': 'dào', '去': 'qù', '与': 'yǔ', '为': 'wèi',
+      '爱': 'ài', '人': 'rén', '们': 'men', '所': 'suǒ', '知': 'zhī', '道': 'dào', '时': 'shí', '间': 'jiān', '因为': 'yīnwèi',
+      '所以': 'suǒyǐ', '但是': 'dànshì', '如果': 'rúguǒ', '虽然': 'suīrán', '而且': 'érqiě', '或者': 'huòzhě', '因此': 'yīncǐ',
+      '牛': 'niú', '羊': 'yáng', '马': 'mǎ', '猪': 'zhū', '鸡': 'jī', '狗': 'gǒu', '猫': 'māo', '鸟': 'niǎo', '鱼': 'yú',
+      '龙': 'lóng', '蛇': 'shé', '虎': 'hǔ', '兔': 'tù', '熊': 'xióng', '狼': 'láng', '鹿': 'lù', '猴': 'hóu', '象': 'xiàng'
+    };
+
+    // 获取拼音（优先用本地表，fallback 到 API）
+    function getPinyin(char) {
+      // 先查本地表
+      if (pinyinMap[char]) {
+        return pinyinMap[char];
+      }
+      // 常用字表没有，再请求 API
+      return fetch(`https://api.pccalc.com/pinyin/${encodeURIComponent(char)}`)
+        .then(r => r.json())
+        .then(d => d.pinyin)
+        .catch(() => '?');
+    }
+
     let writer = null;
 
     async function search() {
@@ -89,15 +119,11 @@
 
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
+      document.getElementById('pinyinDisplay').textContent = '查询中...';
 
       // 获取拼音
-      try {
-        const res = await fetch(`https://api.pccalc.com/pinyin/${encodeURIComponent(char)}`);
-        const data = await res.json();
-        document.getElementById('pinyinDisplay').textContent = data.pinyin || '?';
-      } catch (e) {
-        document.getElementById('pinyinDisplay').textContent = '?';
-      }
+      const pinyin = await getPinyin(char);
+      document.getElementById('pinyinDisplay').textContent = pinyin;
 
       // 显示笔顺动画
       if (writer) {
@@ -108,8 +134,8 @@
         height: 300,
         padding: 20,
         showOutline: true,
-        strokeAnimationSpeed: 1,
-        delayBetweenStrokes: 200,
+        strokeAnimationSpeed: 1.5,
+        delayBetweenStrokes: 150,
         radicalColor: '#667eea'
       });
 
