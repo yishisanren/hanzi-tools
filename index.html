@@ -81,38 +81,89 @@
   </div>
 
   <script>
-    // 获取拼音
-    async function getPinyin(char) {
-      try {
-        const res = await fetch(`https://hanzidict.herokuapp.com/pinyin/${encodeURIComponent(char)}`);
-        const data = await res.json();
-        return data.pinyin || '?';
-      } catch (e) {
-        // Fallback: 本地简单拼音
-        const simplePinyin = {
-          '中': 'zhōng', '国': 'guó', '人': 'rén', '大': 'dà', '小': 'xiǎo', '上': 'shàng', '下': 'xià',
-          '一': 'yī', '二': 'èr', '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù', '七': 'qī', '八': 'bā',
-          '九': 'jiǔ', '十': 'shí', '日': 'rì', '月': 'yuè', '山': 'shān', '水': 'shuǐ', '火': 'huǒ',
-          '木': 'mù', '土': 'tǔ', '金': 'jīn', '手': 'shǒu', '足': 'zú', '口': 'kǒu', '目': 'mù',
-          '耳': 'ěr', '心': 'xīn', '天': 'tiān', '地': 'dì', '风': 'fēng', '雨': 'yǔ', '雪': 'xuě'
-        };
-        return simplePinyin[char] || '?';
-      }
+    // 完整拼音表
+    const pinyinMap = {
+      '的': 'de', '一': 'yī', '是': 'shì', '了': 'le', '不': 'bù', '我': 'wǒ', '有': 'yǒu', '他': 'tā', '这': 'zhè',
+      '们': 'men', '中': 'zhōng', '来': 'lái', '上': 'shàng', '大': 'dà', '为': 'wèi', '你': 'nǐ', '说': 'shuō',
+      '时': 'shí', '要': 'yào', '就': 'jiù', '出': 'chū', '会': 'huì', '可': 'kě', '也': 'yě', '对': 'duì', '生': 'shēng',
+      '能': 'néng', '而': 'ér', '那': 'nà', '得': 'dé', '于': 'yú', '着': 'zhe', '下': 'xià', '自': 'zì', '之': 'zhī',
+      '年': 'nián', '过': 'guò', '发': 'fā', '后': 'hòu', '作': 'zuò', '里': 'lǐ', '用': 'yòng', '道': 'dào', '么': 'me',
+      '好': 'hǎo', '看': 'kàn', '学': 'xué', '只': 'zhǐ', '把': 'bǎ', '吧': 'ba', '吗': 'ma', '呢': 'ne', '啊': 'a',
+      '谁': 'shuí', '什': 'shén', '没': 'méi', '很': 'hěn', '让': 'ràng', '给': 'gěi', '真': 'zhēn', '像': 'xiàng',
+      '和': 'hé', '再': 'zài', '在': 'zài', '个': 'gè', '到': 'dào', '去': 'qù', '与': 'yǔ', '爱': 'ài', '人': 'rén',
+      '所': 'suǒ', '知': 'zhī', '间': 'jiān', '因': 'yīn', '以': 'yǐ', '但': 'dàn', '如': 'rú', '果': 'guǒ', '虽': 'suī',
+      '然': 'rán', '且': 'qiě', '或': 'huò', '此': 'cǐ', '彼': 'bǐ', '牛': 'niú', '羊': 'yáng', '马': 'mǎ', '猪': 'zhū',
+      '鸡': 'jī', '狗': 'gǒu', '猫': 'māo', '鸟': 'niǎo', '龙': 'lóng', '蛇': 'shé', '虎': 'hǔ', '兔': 'tù', '熊': 'xióng',
+      '狼': 'láng', '鹿': 'lù', '猴': 'hóu', '象': 'xiàng', '鼠': 'shǔ', '蛙': 'wā', '蝴': 'hú', '蝶': 'dié', '蚂': 'mǎ',
+      '蚁': 'yǐ', '蜂': 'fēng', '花': 'huā', '草': 'cǎo', '树': 'shù', '木': 'mù', '林': 'lín', '森': 'sēn', '山': 'shān',
+      '水': 'shuǐ', '火': 'huǒ', '土': 'tǔ', '风': 'fēng', '雨': 'yǔ', '雪': 'xuě', '云': 'yún', '日': 'rì', '月': 'yuè',
+      '星': 'xīng', '天': 'tiān', '地': 'dì', '心': 'xīn', '手': 'shǒu', '足': 'zú', '口': 'kǒu', '目': 'mù', '耳': 'ěr',
+      '鼻': 'bí', '牙': 'yá', '舌': 'shé', '头': 'tóu', '脑': 'nǎo', '脸': 'liǎn', '身': 'shēn', '脚': 'jiǎo', '血': 'xuè',
+      '骨': 'gǔ', '肉': 'ròu', '皮': 'pí', '毛': 'máo', '肝': 'gān', '肺': 'fèi', '胃': 'wèi', '肾': 'shèn', '肠': 'cháng',
+      '朋': 'péng', '友': 'yǒu', '爸': 'bà', '妈': 'mā', '哥': 'gē', '弟': 'dì', '姐': 'jiě', '妹': 'mèi', '儿': 'ér',
+      '女': 'nǚ', '男': 'nán', '夫': 'fū', '妻': 'qī', '孙': 'sūn', '老': 'lǎo', '师': 'shī', '校': 'xiào', '班': 'bān',
+      '课': 'kè', '书': 'shū', '笔': 'bǐ', '本': 'běn', '桌': 'zhuō', '椅': 'yǐ', '家': 'jiā', '房': 'fáng', '门': 'mén',
+      '窗': 'chuāng', '床': 'chuáng', '沙': 'shā', '发': 'fā', '电': 'diàn', '话': 'huà', '机': 'jī', '饭': 'fàn', '菜': 'cài',
+      '蛋': 'dàn', '奶': 'nǎi', '茶': 'chá', '酒': 'jiǔ', '果': 'guǒ', '梨': 'lí', '苹': 'píng', '蕉': 'jiāo', '葡': 'pú',
+      '萄': 'táo', '西': 'xī', '瓜': 'guā', '豆': 'dòu', '米': 'mǐ', '面': 'miàn', '包': 'bāo', '饺': 'jiǎo', '粥': 'zhōu',
+      '汤': 'tāng', '筷': 'kuài', '勺': 'sháo', '刀': 'dāo', '叉': 'chā', '盘': 'pán', '碗': 'wǎn', '杯': 'bēi', '瓶': 'píng',
+      '纸': 'zhǐ', '钱': 'qián', '车': 'chē', '船': 'chuán', '飞': 'fēi', '路': 'lù', '桥': 'qiáo', '铁': 'tiě', '站': 'zhàn',
+      '票': 'piào', '游': 'yóu', '泳': 'yǒng', '球': 'qiú', '跑': 'pǎo', '唱': 'chàng', '舞': 'wǔ', '画': 'huà', '弹': 'tán',
+      '琴': 'qín', '听': 'tīng', '音': 'yīn', '乐': 'yuè', '影': 'yǐng', '读': 'dú', '写': 'xiě', '问': 'wèn', '答': 'dá',
+      '想': 'xiǎng', '思': 'sī', '记': 'jì', '忘': 'wàng', '懂': 'dǒng', '明': 'míng', '白': 'bái', '红': 'hóng',
+      '黄': 'huáng', '蓝': 'lán', '绿': 'lǜ', '紫': 'zǐ', '黑': 'hēi', '灰': 'huī', '粉': 'fěn', '棕': 'zōng', '橙': 'chéng',
+      '多': 'duō', '少': 'shǎo', '高': 'gāo', '矮': 'ǎi', '长': 'cháng', '短': 'duǎn', '粗': 'cū', '细': 'xì', '重': 'zhòng',
+      '轻': 'qīng', '软': 'ruǎn', '硬': 'yìng', '新': 'xīn', '旧': 'jiù', '坏': 'huài', '快': 'kuài', '慢': 'màn', '早': 'zǎo',
+      '晚': 'wǎn', '今': 'jīn', '昨': 'zuó', '周': 'zhōu', '春': 'chūn', '夏': 'xià', '秋': 'qiū', '冬': 'dōng', '冷': 'lěng',
+      '热': 'rè', '温': 'wēn', '凉': 'liáng', '晴': 'qíng', '阴': 'yīn', '元': 'yuán', '角': 'jiǎo', '分': 'fēn', '块': 'kuài',
+      '斤': 'jīn', '公': 'gōng', '公': 'gōng', '号': 'hào', '排': 'pái', '街': 'jiē', '旁': 'páng', '边': 'biān', '前': 'qián',
+      '左': 'zuǒ', '右': 'yòu', '东': 'dōng', '南': 'nán', '西': 'xī', '北': 'běi', '世': 'shì', '界': 'jiè', '国': 'guó',
+      '家': 'jiā', '民': 'mín', '族': 'zú', '己': 'jǐ', '现': 'xiàn', '已': 'yǐ', '以': 'yǐ', '后': 'hòu', '前': 'qián',
+      '先': 'xiān', '最': 'zuì', '更': 'gèng', '太': 'tài', '常': 'cháng', '别': 'bié', '点': 'diǎn', '些': 'xiē', '两': 'liǎng',
+      '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù', '七': 'qī', '八': 'bā', '九': 'jiǔ', '十': 'shí', '零': 'líng',
+      '百': 'bǎi', '千': 'qiān', '万': 'wàn', '亿': 'yì', '第': 'dì', '起': 'qǐ', '床': 'chuáng', '洗': 'xǐ', '脸': 'liǎn',
+      '刷': 'shuā', '牙': 'yá', '漱': 'shù', '吃': 'chī', '喝': 'hē', '走': 'zǒu', '坐': 'zuò', '站': 'zhàn', '躺': 'tǎng',
+      '睡': 'shuì', '醒': 'xǐng', '梦': 'mèng', '觉': 'jiào', '温': 'wēn', '习': 'xí', '复': 'fù', '考': 'kǎo', '试': 'shì',
+      '分': 'fēn', '数': 'shù', '教': 'jiào', '室': 'shì', '黑': 'hēi', '板': 'bǎn', '包': 'bāo', '服': 'fú', '帽': 'mào',
+      '跳': 'tiào', '绳': 'shéng', '键': 'jiàn', '拍': 'pāi', '笛': 'dí', '鼓': 'gǔ', '歌': 'gē', '戏': 'xì', '视': 'shì',
+      '网': 'wǎng', '页': 'yè', '站': 'zhàn', '聊': 'liáo', '微': 'wēi', '信': 'xìn', 'QQ': 'QQ', '群': 'qún', '短': 'duǎn',
+      '彩': 'cǎi', '手': 'shǒu', '号': 'hào', '码': 'mǎ', '池': 'chí', '充': 'chōng', '耳': 'ěr', '播': 'bō', '摄': 'shè',
+      '相': 'xiāng', '片': 'piàn', '照': 'zhào', '图': 'tú', '邮': 'yóu', '封': 'fēng', '寄': 'jì', '取': 'qǔ', '特': 'tè',
+      '快': 'kuài', '递': 'dì', '流': 'liú', '餐': 'cān', '馆': 'guǎn', '酒': 'jiǔ', '店': 'diàn', '宾': 'bīn', '房': 'fáng',
+      '楼': 'lóu', '层': 'céng', '电': 'diàn', '梯': 'tī', '安': 'ān', '全': 'quán', '出': 'chū', '口': 'kǒu', '急': 'jí',
+      '救': 'jiù', '名': 'míng', '字': 'zì', '称': 'chēng', '密': 'mì', '码': 'mǎ', '账': 'zhàng', '户': 'hù', '注': 'zhù',
+      '册': 'cè', '登': 'dēng', '录': 'lù', '销': 'xiāo', '绑': 'bǎng', '定': 'dìng', '消': 'xiāo', '息': 'xī', '通': 'tōng',
+      '留': 'liú', '言': 'yán', '评': 'píng', '论': 'lùn', '赞': 'zàn', '赏': 'shǎng', '转': 'zhuǎn', '收': 'shōu', '藏': 'cáng',
+      '同': 'tóng', '意': 'yì', '反': 'fǎn', '对': 'duì', '支': 'zhī', '持': 'chí', '帮': 'bāng', '助': 'zhù', '谢': 'xiè',
+      '感': 'gǎn', '激': 'jī', '抱': 'bào', '歉': 'qiàn', '紧': 'jǐn', '张': 'zhāng', '松': 'sōng', '兴': 'xìng', '乐': 'lè',
+      '愉': 'yú', '快': 'kuài', '幸': 'xìng', '福': 'fú', '满': 'mǎn', '骄': 'jiāo', '傲': 'ào', '厉': 'lì', '害': 'hài',
+      '棒': 'bàng', '优': 'yōu', '秀': 'xiù', '聪': 'cōng', '明': 'míng', '智': 'zhì', '慧': 'huì', '勇': 'yǒng', '敢': 'gǎn',
+      '坚': 'jiān', '强': 'qiáng', '努': 'nǔ', '力': 'lì', '奋': 'fèn', '认': 'rèn', '真': 'zhēn', '仔': 'zǐ', '细': 'xì',
+      '耐': 'nài', '爱': 'ài', '关': 'guān', '孝': 'xiào', '顺': 'shùn', '尊': 'zūn', '敬': 'jìng', '礼': 'lǐ', '貌': 'mào',
+      '诚': 'chéng', '实': 'shí', '守': 'shǒu', '善': 'shàn', '良': 'liáng', '热': 'rè', '心': 'xīn', '大': 'dà', '方': 'fāng',
+      '节': 'jié', '约': 'yuē', '浪': 'làng', '费': 'fèi', '保': 'bǎo', '环': 'huán', '护': 'hù', '公': 'gōng', '物': 'wù',
+      '秩': 'zhì', '序': 'xù', '文': 'wén', '明': 'míng', '服': 'fú', '务': 'wù', '社': 'shè', '会': 'huì', '贡': 'gòng',
+      '献': 'xiàn', '责': 'zé', '任': 'rèn', '务': 'wù', '权': 'quán', '利': 'lì', '由': 'yóu', '平': 'píng', '公': 'gōng',
+      '正': 'zhèng', '义': 'yì', '和': 'hé', '平': 'píng', '作': 'zuò', '合': 'hé', '团': 'tuán', '目': 'mù', '标': 'biāo',
+      '理': 'lǐ', '想': 'xiǎng', '成': 'chéng', '功': 'gōng', '败': 'bài', '经': 'jīng', '验': 'yàn', '教': 'jiào', '训': 'xùn',
+      '进': 'jìn', '步': 'bù', '成': 'chéng', '长': 'zhǎng', '改': 'gǎi', '革': ' gé', '新': 'xīn', '发': 'fā', '展': 'zhǎn',
+      '未': 'wèi', '来': 'lái', '希': 'xī', '望': 'wàng', '梦': 'mèng', '加': 'jiā', '油': 'yóu', '坚': 'jiān', '持': 'chí',
+      '永': 'yǒng', '放': 'fàng', '弃': 'qì', '相': 'xiāng', '信': 'xìn', '一': 'yī', '定': 'dìng'
+    };
+
+    function getPinyin(char) {
+      return pinyinMap[char] || '?';
     }
 
     let writer = null;
 
-    async function search() {
+    function search() {
       const char = document.getElementById('charInput').value.trim();
       if (!char) return alert('请输入一个汉字');
 
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
-      document.getElementById('pinyinDisplay').textContent = '加载中...';
-
-      // 获取拼音
-      const pinyin = await getPinyin(char);
-      document.getElementById('pinyinDisplay').textContent = pinyin;
+      document.getElementById('pinyinDisplay').textContent = getPinyin(char);
 
       // 显示笔顺动画
       document.getElementById('character').innerHTML = '';
@@ -125,7 +176,7 @@
         outlineColor: '#ddd',
         strokeAnimationSpeed: 1.5,
         delayBetweenStrokes: 150,
-        strokeColor: '#333333',  // 深灰色，不置灰
+        strokeColor: '#333333',
         radicalColor: '#667eea'
       });
 
@@ -136,10 +187,7 @@
       if (writer) {
         writer.animateCharacter({
           onComplete: () => {
-            // 动画完成后取消置灰效果，保持原色
-            if (writer) {
-              writer.showCharacter();
-            }
+            if (writer) writer.showCharacter();
           }
         });
       }
@@ -148,17 +196,14 @@
     function quiz() {
       if (writer) {
         writer.quiz({
-          onMistake: () => console.log('笔画错误'),
-          onCorrectStroke: () => console.log('正确'),
           onComplete: () => {
+            writer.showCharacter();
             alert('太棒了！写完了！');
-            writer.showCharacter();  // 完成后显示原色
           }
         });
       }
     }
 
-    // 回车搜索
     document.getElementById('charInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') search();
     });
