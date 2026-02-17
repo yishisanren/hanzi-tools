@@ -81,26 +81,30 @@
   </div>
 
   <script>
-    // 获取拼音（极速API）
+    // 获取拼音
     async function getPinyin(char) {
       try {
-        const res = await fetch(`https://pinyin.api.luojia.top/pinyin/${encodeURIComponent(char)}`);
+        const res = await fetch(`https://hanzidict.herokuapp.com/pinyin/${encodeURIComponent(char)}`);
         const data = await res.json();
-        return data.pinyin || data.py || '?';
+        return data.pinyin || '?';
       } catch (e) {
-        return '?';
+        // Fallback: 本地简单拼音
+        const simplePinyin = {
+          '中': 'zhōng', '国': 'guó', '人': 'rén', '大': 'dà', '小': 'xiǎo', '上': 'shàng', '下': 'xià',
+          '一': 'yī', '二': 'èr', '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù', '七': 'qī', '八': 'bā',
+          '九': 'jiǔ', '十': 'shí', '日': 'rì', '月': 'yuè', '山': 'shān', '水': 'shuǐ', '火': 'huǒ',
+          '木': 'mù', '土': 'tǔ', '金': 'jīn', '手': 'shǒu', '足': 'zú', '口': 'kǒu', '目': 'mù',
+          '耳': 'ěr', '心': 'xīn', '天': 'tiān', '地': 'dì', '风': 'fēng', '雨': 'yǔ', '雪': 'xuě'
+        };
+        return simplePinyin[char] || '?';
       }
     }
 
     let writer = null;
-    let currentChar = '';
 
     async function search() {
-      const input = document.getElementById('charInput').value.trim();
-      if (!input) return alert('请输入一个汉字');
-
-      const char = input[0];
-      currentChar = char;
+      const char = document.getElementById('charInput').value.trim();
+      if (!char) return alert('请输入一个汉字');
 
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
@@ -113,10 +117,6 @@
       // 显示笔顺动画
       document.getElementById('character').innerHTML = '';
       
-      // 使用多色笔顺
-      const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e91e63', '#00bcd4'];
-      const colorIndex = char.charCodeAt(0) % colors.length;
-      
       writer = HanziWriter.create('character', char, {
         width: 300,
         height: 300,
@@ -125,7 +125,7 @@
         outlineColor: '#ddd',
         strokeAnimationSpeed: 1.5,
         delayBetweenStrokes: 150,
-        strokeColor: colors[colorIndex],  // 完成后显示的颜色
+        strokeColor: '#333333',  // 深灰色，不置灰
         radicalColor: '#667eea'
       });
 
@@ -134,7 +134,14 @@
 
     function animate() {
       if (writer) {
-        writer.animateCharacter({ onComplete: () => quiz() });
+        writer.animateCharacter({
+          onComplete: () => {
+            // 动画完成后取消置灰效果，保持原色
+            if (writer) {
+              writer.showCharacter();
+            }
+          }
+        });
       }
     }
 
@@ -143,7 +150,10 @@
         writer.quiz({
           onMistake: () => console.log('笔画错误'),
           onCorrectStroke: () => console.log('正确'),
-          onComplete: () => alert('太棒了！写完了！')
+          onComplete: () => {
+            alert('太棒了！写完了！');
+            writer.showCharacter();  // 完成后显示原色
+          }
         });
       }
     }
