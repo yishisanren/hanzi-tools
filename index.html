@@ -82,16 +82,6 @@
   </div>
 
   <script>
-    // 页面加载时检查是否有保存的汉字
-    window.onload = function() {
-      const savedChar = localStorage.getItem('hanzi_char');
-      if (savedChar) {
-        document.getElementById('charInput').value = savedChar;
-        search();
-        localStorage.removeItem('hanzi_char');
-      }
-    };
-
     function getPinyin(char) {
       // 使用 cnchar 库获取拼音
       if (cnchar && cnchar.spell) {
@@ -108,9 +98,6 @@
     function search() {
       const char = document.getElementById('charInput').value.trim();
       if (!char) return alert('请输入一个汉字');
-
-      // 保存汉字到 localStorage
-      localStorage.setItem('hanzi_char', char);
 
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
@@ -130,14 +117,17 @@
         strokeColor: '#333333',
         radicalColor: '#667eea'
       });
+
+      // 使用 setTimeout 确保 writer 创建完成
+      setTimeout(() => {
+        animate();
+      }, 100);
     }
 
     function animate() {
-      // 刷新页面并重新查询当前汉字
-      const char = document.getElementById('charInput').value.trim();
-      if (!char) return;
-      localStorage.setItem('hanzi_char', char);
-      location.reload();
+      if (writer) {
+        writer.animateCharacter();
+      }
     }
 
     function quiz() {
