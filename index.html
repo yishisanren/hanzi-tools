@@ -117,20 +117,30 @@
         strokeColor: '#333333',
         radicalColor: '#667eea'
       });
-
-      // 使用 setTimeout 确保 writer 创建完成
+      
+      // 延迟播放，确保数据加载完成
       setTimeout(() => {
-        animate();
-      }, 100);
+        if (writer) writer.animateCharacter();
+      }, 200);
     }
 
+    let isAnimating = false;
+
     function animate() {
-      if (writer) {
-        writer.hideCharacter();
-        setTimeout(() => {
-          writer.animateCharacter();
-        }, 300);
-      }
+      if (!writer || isAnimating) return;
+      isAnimating = true;
+      
+      // 隐藏字符
+      writer.hideCharacter({ duration: 50 });
+      
+      // 延迟后播放动画
+      setTimeout(() => {
+        writer.animateCharacter({
+          onComplete: () => {
+            isAnimating = false;
+          }
+        });
+      }, 100);
     }
 
     function quiz() {
