@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/cnchar/cnchar.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; overflow-x: hidden; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -15,53 +16,111 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 20px;
     }
-    h1 { color: white; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+    h1 { 
+      color: white; 
+      margin-bottom: 20px; 
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      font-size: 1.5rem;
+      text-align: center;
+    }
     .container {
       background: white;
       border-radius: 20px;
-      padding: 40px;
+      padding: 20px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-      max-width: 600px;
       width: 100%;
+      max-width: 500px;
     }
-    .input-group { display: flex; gap: 10px; margin-bottom: 30px; }
+    .input-group { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 20px; 
+    }
     input {
       flex: 1;
-      padding: 15px 20px;
+      padding: 12px 15px;
       font-size: 18px;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
       outline: none;
       transition: border-color 0.3s;
+      min-width: 0;
     }
     input:focus { border-color: #667eea; }
     button {
-      padding: 15px 30px;
-      font-size: 18px;
+      padding: 12px 20px;
+      font-size: 16px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
     }
     button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+    button:active { transform: translateY(0); }
     .result { display: none; text-align: center; }
     .result.active { display: block; }
-    .char-display { font-size: 120px; margin-bottom: 20px; }
-    .pinyin { font-size: 32px; color: #667eea; margin-bottom: 30px; }
-    #character { width: 300px; height: 300px; margin: 0 auto; border: 2px solid #f0f0f0; border-radius: 15px; }
-    .controls { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .char-display { font-size: 80px; margin-bottom: 15px; }
+    .pinyin { font-size: 24px; color: #667eea; margin-bottom: 20px; }
+    #character { 
+      width: 100%; 
+      max-width: 280px; 
+      height: 0;
+      padding-bottom: 100%;
+      margin: 0 auto;
+      position: relative;
+      border: 2px solid #f0f0f0;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    #character div {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .controls { 
+      display: none; 
+      gap: 8px; 
+      justify-content: center; 
+      margin-top: 15px; 
+      flex-wrap: wrap;
+    }
+    .controls.active { display: flex; }
     .controls button {
-      padding: 10px 20px;
+      padding: 10px 16px;
       font-size: 14px;
       background: #f5f5f5;
       color: #333;
     }
     .controls button:hover { background: #667eea; color: white; }
-    .controls { display: none; }
+    
+    /* 响应式布局 */
+    @media (min-width: 768px) {
+      body { padding: 40px 20px; }
+      h1 { font-size: 2rem; margin-bottom: 30px; }
+      .container { padding: 40px; max-width: 600px; }
+      .input-group { margin-bottom: 30px; }
+      input { padding: 15px 20px; font-size: 20px; }
+      button { padding: 15px 30px; font-size: 18px; }
+      .char-display { font-size: 120px; margin-bottom: 20px; }
+      .pinyin { font-size: 32px; margin-bottom: 30px; }
+      #character { max-width: 350px; }
+      .controls { margin-top: 20px; gap: 10px; }
+      .controls button { padding: 12px 20px; font-size: 15px; }
+    }
+    
+    /* 超小屏幕 */
+    @media (max-width: 380px) {
+      .input-group { flex-direction: column; }
+      button { width: 100%; }
+      .char-display { font-size: 60px; }
+    }
   </style>
 </head>
 <body>
@@ -74,8 +133,8 @@
     <div class="result" id="result">
       <div class="char-display" id="charDisplay"></div>
       <div class="pinyin" id="pinyinDisplay"></div>
-      <div id="character"></div>
-      <div class="controls">
+      <div id="character"><div id="characterInner"></div></div>
+      <div class="controls" id="controls">
         <button onclick="animate()">🔄 播放动画</button>
         <button onclick="quiz()">✍️ 练习模式</button>
       </div>
@@ -84,7 +143,6 @@
 
   <script>
     function getPinyin(char) {
-      // 使用 cnchar 库获取拼音
       if (cnchar && cnchar.spell) {
         const pinyin = char.spell('tone');
         if (pinyin && pinyin !== char) {
@@ -103,13 +161,16 @@
       document.getElementById('result').classList.add('active');
       document.getElementById('charDisplay').textContent = char;
       document.getElementById('pinyinDisplay').textContent = getPinyin(char);
+      document.getElementById('controls').classList.add('active');
 
-      // 显示笔顺动画
-      document.getElementById('character').innerHTML = '';
+      document.getElementById('characterInner').innerHTML = '';
       
-      writer = HanziWriter.create('character', char, {
-        width: 300,
-        height: 300,
+      const container = document.getElementById('character');
+      const size = container.offsetWidth || 280;
+
+      writer = HanziWriter.create('characterInner', char, {
+        width: size,
+        height: size,
         padding: 20,
         showOutline: true,
         outlineColor: '#ddd',
@@ -119,7 +180,6 @@
         radicalColor: '#667eea'
       });
 
-      // 使用 setTimeout 确保 writer 创建完成
       setTimeout(() => {
         animate();
       }, 100);
@@ -139,6 +199,29 @@
 
     document.getElementById('charInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') search();
+    });
+    
+    // 窗口大小改变时重新调整
+    window.addEventListener('resize', () => {
+      if (writer && document.getElementById('result').classList.contains('active')) {
+        const char = document.getElementById('charInput').value.trim();
+        if (char) {
+          const container = document.getElementById('character');
+          const size = container.offsetWidth || 280;
+          document.getElementById('characterInner').innerHTML = '';
+          writer = HanziWriter.create('characterInner', char, {
+            width: size,
+            height: size,
+            padding: 20,
+            showOutline: true,
+            outlineColor: '#ddd',
+            strokeAnimationSpeed: 1.5,
+            delayBetweenStrokes: 150,
+            strokeColor: '#333333',
+            radicalColor: '#667eea'
+          });
+        }
+      }
     });
   </script>
 </body>
