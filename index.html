@@ -151,15 +151,20 @@
       document.getElementById('pinyinDisplay').textContent = getPinyin(char);
       document.getElementById('controls').classList.add('active');
 
-      createWriter(char);
+      // 等一帧确保布局生效后再创建 writer
+      requestAnimationFrame(function() {
+        createWriter(char);
+      });
     }
 
     function createWriter(char) {
       var el = document.getElementById('character');
       el.innerHTML = '';
-      var size = el.clientWidth;
 
-      writer = HanziWriter.create('character', char, {
+      // 读取实际尺寸，兜底用 CSS 定义的值
+      var size = el.clientWidth || el.offsetWidth || 280;
+
+      var w = HanziWriter.create(el, char, {
         width: size,
         height: size,
         padding: 20,
@@ -169,23 +174,15 @@
         delayBetweenStrokes: 300,
         strokeColor: '#333333',
         radicalColor: '#667eea',
-        charDataLoader: function(char, onComplete) {
-          var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(char) + '.json';
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', url, true);
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                onComplete(JSON.parse(xhr.responseText));
-              }
-            }
-          };
-          xhr.send();
-        },
-        onLoadCharDataSuccess: function() {
-          writer.animateCharacter();
+        onLoadCharDataError: function(reason) {
+          console.error('汉字数据加载失败:', reason);
+          el.innerHTML = '<p style="color:red;padding:20px;">加载失败，请检查输入</p>';
         }
       });
+
+      writer = w;
+      // animateCharacter 会在数据加载完成后自动播放
+      w.animateCharacter();
     }
 
     function animate() {
