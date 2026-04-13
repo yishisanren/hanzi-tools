@@ -19,16 +19,16 @@ const pinyinStyle = require('pinyin').STYLE_TONE;
 const fs = require('fs');
 const path = require('path');
 
-// 获取拼音
+// 获取拼音（支持多字符）
 function getPinyin(char) {
   try {
     const result = pinyin(char, {
       style: pinyinStyle,
       heteronym: false
     });
-    
-    if (result && result.length > 0 && result[0]) {
-      return result[0][0] || '?';
+
+    if (result && result.length > 0) {
+      return result.map(r => (r && r[0]) || '?').join(' ');
     }
     return '?';
   } catch (e) {
@@ -38,20 +38,23 @@ function getPinyin(char) {
 
 // 生成 HTML 页面（使用 hanzi-writer）
 function generateHTML(char, pinyinChar) {
+  const chars = Array.from(char);
+  const charTargets = chars.map((_, i) => `<div id="character-target-${i}" class="char-box"></div>`).join('\n            ');
+
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>汉字 "${char}" - 拼音: ${pinyinChar}</title>
-    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -61,17 +64,17 @@ function generateHTML(char, pinyinChar) {
             align-items: center;
             padding: 40px 20px;
         }
-        
+
         .container {
             background: white;
             border-radius: 24px;
             padding: 40px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             text-align: center;
         }
-        
+
         .char-display {
             font-size: 120px;
             font-weight: bold;
@@ -79,23 +82,30 @@ function generateHTML(char, pinyinChar) {
             margin-bottom: 10px;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
         }
-        
+
         .pinyin {
             font-size: 36px;
             color: #e74c3c;
             margin-bottom: 30px;
             font-weight: 500;
         }
-        
-        #character-target {
-            width: 300px;
-            height: 300px;
+
+        .writers-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
             margin: 20px auto;
+        }
+
+        .char-box {
+            width: 250px;
+            height: 250px;
             background: #f8f9fa;
             border-radius: 16px;
             border: 3px dashed #dee2e6;
         }
-        
+
         .btn-group {
             display: flex;
             flex-wrap: wrap;
@@ -103,7 +113,7 @@ function generateHTML(char, pinyinChar) {
             justify-content: center;
             margin-top: 30px;
         }
-        
+
         button {
             padding: 14px 28px;
             font-size: 16px;
@@ -116,42 +126,42 @@ function generateHTML(char, pinyinChar) {
             align-items: center;
             gap: 8px;
         }
-        
+
         button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
-        
+
         button:active {
             transform: translateY(-1px);
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
         }
-        
+
         .btn-warning {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
         }
-        
+
         .btn-outline {
             background: transparent;
             border: 3px solid #667eea;
             color: #667eea;
         }
-        
+
         .btn-outline:hover {
             background: #667eea;
             color: white;
         }
-        
+
         .info-box {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
             border-radius: 12px;
@@ -159,19 +169,19 @@ function generateHTML(char, pinyinChar) {
             margin-top: 25px;
             text-align: left;
         }
-        
+
         .info-box h3 {
             color: #2c3e50;
             margin-bottom: 12px;
             font-size: 16px;
         }
-        
+
         .info-box p {
             color: #7f8c8d;
             line-height: 1.8;
             font-size: 14px;
         }
-        
+
         .highlight {
             background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
             padding: 2px 8px;
@@ -179,12 +189,12 @@ function generateHTML(char, pinyinChar) {
             font-weight: 600;
             color: #2c3e50;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .container {
             animation: fadeIn 0.6s ease-out;
         }
@@ -194,9 +204,11 @@ function generateHTML(char, pinyinChar) {
     <div class="container">
         <div class="char-display">${char}</div>
         <div class="pinyin">${pinyinChar}</div>
-        
-        <div id="character-target"></div>
-        
+
+        <div class="writers-container">
+            ${charTargets}
+        </div>
+
         <div class="btn-group">
             <button class="btn-primary" onclick="animateStroke()">
                 <span>🎨</span> 显示笔顺
@@ -211,7 +223,7 @@ function generateHTML(char, pinyinChar) {
                 <span>🔄</span> 重置
             </button>
         </div>
-        
+
         <div class="info-box">
             <h3>💡 使用说明</h3>
             <p>
@@ -224,81 +236,89 @@ function generateHTML(char, pinyinChar) {
     </div>
 
     <script>
-        // 创建 hanzi-writer 实例
-        const writer = HanziWriter.create('character-target', '${char}', {
-            width: 300,
-            height: 300,
-            padding: 20,
-            showOutline: true,
-            strokeAnimationSpeed: 1,
-            delayBetweenStrokes: 300,
-            strokeColor: '#2c3e50',
-            radicalColor: '#667eea',
-            outlineColor: '#bdc3c7',
-            drawingWidth: 20,
-        });
+        var chars = ${JSON.stringify(chars)};
+        var writers = [];
+        var slowWriters = [];
 
-        // 获取当前显示的汉字
-        function getCurrentChar() {
-            return '${char}';
+        // 为每个字符创建 normal 和 slow 两个 writer
+        function createWriters(speed, delay) {
+            return chars.map(function(c, i) {
+                var targetId = 'character-target-' + i;
+                document.getElementById(targetId).innerHTML = '';
+                return HanziWriter.create(targetId, c, {
+                    width: 250,
+                    height: 250,
+                    padding: 20,
+                    showOutline: true,
+                    strokeAnimationSpeed: speed,
+                    delayBetweenStrokes: delay,
+                    strokeColor: '#2c3e50',
+                    radicalColor: '#667eea',
+                    outlineColor: '#bdc3c7',
+                    drawingWidth: 20,
+                });
+            });
+        }
+
+        writers = createWriters(1, 300);
+
+        // 按顺序播放所有字符的动画
+        function animateSequential(writerList, index) {
+            if (index >= writerList.length) return;
+            writerList[index].animateCharacter({
+                onComplete: function() {
+                    animateSequential(writerList, index + 1);
+                }
+            });
         }
 
         // 正常速度演示
         function animateStroke() {
-            writer.animateCharacter({
-                onComplete: function() {
-                    console.log('✅ 笔顺演示完成！');
-                }
-            });
+            writers = createWriters(1, 300);
+            animateSequential(writers, 0);
         }
 
-        // 慢速演示
+        // 慢速演示 — 重新创建 writer 使用慢速参数
         function slowAnimate() {
-            writer.animateCharacter({
-                strokeAnimationSpeed: 0.5,
-                delayBetweenStrokes: 500,
-                onComplete: function() {
-                    console.log('✅ 慢速演示完成！');
-                }
-            });
+            writers = createWriters(0.5, 500);
+            animateSequential(writers, 0);
         }
 
-        // 练习模式
+        // 练习模式 — 按顺序逐字练习
         function quizMode() {
-            writer.quiz({
-                strokeAnimationSpeed: 0.5,
-                delayBetweenStrokes: 200,
+            writers = createWriters(1, 300);
+            startQuiz(0);
+        }
+
+        function startQuiz(index) {
+            if (index >= writers.length) {
+                alert('🎉 所有字都练习完成！');
+                return;
+            }
+            writers[index].quiz({
                 onMistake: function(strokeData) {
-                    console.log('❌ 笔画错误: ' + strokeData.strokeNum);
+                    console.log('❌ 第' + (index+1) + '字 笔画错误: ' + strokeData.strokeNum);
                 },
                 onCorrectStroke: function(strokeData) {
-                    console.log('✅ 正确笔画: ' + strokeData.strokeNum);
+                    console.log('✅ 第' + (index+1) + '字 正确笔画: ' + strokeData.strokeNum);
                 },
                 onComplete: function(summaryData) {
-                    console.log('📊 练习完成！');
-                    console.log('   总笔画: ' + summaryData.totalStrokes);
-                    console.log('   错误次数: ' + summaryData.mistakes);
-                    
                     if (summaryData.mistakes === 0) {
-                        alert('🎉 太棒了！你完美写出了这个字！');
-                    } else if (summaryData.mistakes < 3) {
-                        alert('👍 不错！继续加油！错误 ' + summaryData.mistakes + ' 次');
-                    } else {
-                        alert('💪 多练习几次，你会越来越好的！');
+                        console.log('🎉 第' + (index+1) + '字完美！');
                     }
+                    startQuiz(index + 1);
                 }
             });
         }
 
         // 重置
         function reset() {
-            writer.setCharacter('${char}');
-            console.log('🔄 已重置');
+            writers = createWriters(1, 300);
         }
 
         // 页面加载后自动演示
         setTimeout(function() {
-            animateStroke();
+            animateSequential(writers, 0);
         }, 800);
     </script>
 </body>
