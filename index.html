@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>汉字拼音和笔顺学习</title>
   <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/cnchar/cnchar.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cnchar@3.2.6/cnchar.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; overflow-x: hidden; }
@@ -18,9 +18,9 @@
       align-items: center;
       padding: 20px;
     }
-    h1 { 
-      color: white; 
-      margin-bottom: 20px; 
+    h1 {
+      color: white;
+      margin-bottom: 20px;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
       font-size: 1.5rem;
       text-align: center;
@@ -33,10 +33,10 @@
       width: 100%;
       max-width: 500px;
     }
-    .input-group { 
-      display: flex; 
-      gap: 10px; 
-      margin-bottom: 20px; 
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
     }
     input {
       flex: 1;
@@ -66,29 +66,18 @@
     .result.active { display: block; }
     .char-display { font-size: 80px; margin-bottom: 15px; }
     .pinyin { font-size: 24px; color: #667eea; margin-bottom: 20px; }
-    #character { 
-      width: 100%; 
-      max-width: 280px; 
-      height: 0;
-      padding-bottom: 100%;
+    #character {
+      width: 280px;
+      height: 280px;
       margin: 0 auto;
-      position: relative;
       border: 2px solid #f0f0f0;
       border-radius: 15px;
-      overflow: hidden;
     }
-    #character div {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-    .controls { 
-      display: none; 
-      gap: 8px; 
-      justify-content: center; 
-      margin-top: 15px; 
+    .controls {
+      display: none;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 15px;
       flex-wrap: wrap;
     }
     .controls.active { display: flex; }
@@ -99,8 +88,7 @@
       color: #333;
     }
     .controls button:hover { background: #667eea; color: white; }
-    
-    /* 响应式布局 */
+
     @media (min-width: 768px) {
       body { padding: 40px 20px; }
       h1 { font-size: 2rem; margin-bottom: 30px; }
@@ -110,16 +98,16 @@
       button { padding: 15px 30px; font-size: 18px; }
       .char-display { font-size: 120px; margin-bottom: 20px; }
       .pinyin { font-size: 32px; margin-bottom: 30px; }
-      #character { max-width: 350px; }
+      #character { width: 350px; height: 350px; }
       .controls { margin-top: 20px; gap: 10px; }
       .controls button { padding: 12px 20px; font-size: 15px; }
     }
-    
-    /* 超小屏幕 */
+
     @media (max-width: 380px) {
       .input-group { flex-direction: column; }
       button { width: 100%; }
       .char-display { font-size: 60px; }
+      #character { width: 240px; height: 240px; }
     }
   </style>
 </head>
@@ -133,7 +121,7 @@
     <div class="result" id="result">
       <div class="char-display" id="charDisplay"></div>
       <div class="pinyin" id="pinyinDisplay"></div>
-      <div id="character"><div id="characterInner"></div></div>
+      <div id="character"></div>
       <div class="controls" id="controls">
         <button onclick="animate()">🔄 播放动画</button>
         <button onclick="quiz()">✍️ 练习模式</button>
@@ -143,19 +131,19 @@
 
   <script>
     function getPinyin(char) {
-      if (cnchar && cnchar.spell) {
-        const pinyin = char.spell('tone');
-        if (pinyin && pinyin !== char) {
-          return pinyin;
+      try {
+        if (typeof cnchar !== 'undefined' && cnchar.spell) {
+          var py = char.spell('tone');
+          if (py && py !== char) return py;
         }
-      }
+      } catch (e) {}
       return '?';
     }
 
-    let writer = null;
+    var writer = null;
 
     function search() {
-      const char = document.getElementById('charInput').value.trim();
+      var char = document.getElementById('charInput').value.trim();
       if (!char) return alert('请输入一个汉字');
 
       document.getElementById('result').classList.add('active');
@@ -163,65 +151,53 @@
       document.getElementById('pinyinDisplay').textContent = getPinyin(char);
       document.getElementById('controls').classList.add('active');
 
-      document.getElementById('characterInner').innerHTML = '';
-      
-      const container = document.getElementById('character');
-      const size = container.offsetWidth || 280;
+      createWriter(char);
+    }
 
-      writer = HanziWriter.create('characterInner', char, {
+    function createWriter(char) {
+      var el = document.getElementById('character');
+      el.innerHTML = '';
+      var size = el.clientWidth;
+
+      writer = HanziWriter.create('character', char, {
         width: size,
         height: size,
         padding: 20,
         showOutline: true,
         outlineColor: '#ddd',
-        strokeAnimationSpeed: 1.5,
-        delayBetweenStrokes: 150,
+        strokeAnimationSpeed: 1,
+        delayBetweenStrokes: 300,
         strokeColor: '#333333',
-        radicalColor: '#667eea'
+        radicalColor: '#667eea',
+        charDataLoader: function(char, onComplete) {
+          var url = 'https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(char) + '.json';
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', url, true);
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+              if (xhr.status === 200) {
+                onComplete(JSON.parse(xhr.responseText));
+              }
+            }
+          };
+          xhr.send();
+        },
+        onLoadCharDataSuccess: function() {
+          writer.animateCharacter();
+        }
       });
-
-      setTimeout(() => {
-        animate();
-      }, 100);
     }
 
     function animate() {
-      if (writer) {
-        writer.animateCharacter();
-      }
+      if (writer) writer.animateCharacter();
     }
 
     function quiz() {
-      if (writer) {
-        writer.quiz();
-      }
+      if (writer) writer.quiz();
     }
 
-    document.getElementById('charInput').addEventListener('keypress', (e) => {
+    document.getElementById('charInput').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') search();
-    });
-    
-    // 窗口大小改变时重新调整
-    window.addEventListener('resize', () => {
-      if (writer && document.getElementById('result').classList.contains('active')) {
-        const char = document.getElementById('charInput').value.trim();
-        if (char) {
-          const container = document.getElementById('character');
-          const size = container.offsetWidth || 280;
-          document.getElementById('characterInner').innerHTML = '';
-          writer = HanziWriter.create('characterInner', char, {
-            width: size,
-            height: size,
-            padding: 20,
-            showOutline: true,
-            outlineColor: '#ddd',
-            strokeAnimationSpeed: 1.5,
-            delayBetweenStrokes: 150,
-            strokeColor: '#333333',
-            radicalColor: '#667eea'
-          });
-        }
-      }
     });
   </script>
 </body>
