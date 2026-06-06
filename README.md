@@ -1,103 +1,64 @@
-# 汉字拼音和笔顺工具
+# 会读会写 Read & Write
 
-这是一个帮助你学习汉字拼音和笔顺的工具！
+> 汉字拼音 + 笔顺学习 iOS App 的资源仓库
 
-## ✨ 功能
+## 当前状态
 
-1. **🔤 拼音查询** - 快速获取汉字的标准拼音（带声调）
-2. **🖊️ 笔顺动画** - 生成交互式 HTML 页面，动态演示汉字书写顺序
-3. **✍️ 练习模式** - 可以跟着笔画顺序练习书写，实时检测正确性
+- **品牌**: 会读会写 / Read & Write（已锁定）
+- **里程碑**: M0 完成（资源整理 + 本地化）→ 进入 M1（iOS 工程骨架）
+- **目标平台**: iOS 17+
 
-## 🚀 快速开始
+## 快速开始
 
-### 安装依赖
-
-```bash
-cd /home/abc/.openclaw/workspace/hanzi-tools
-npm install
-```
-
-### 使用方法
+### 浏览器看 web 版（参考实现）
 
 ```bash
-# 仅获取拼音
-node hanzi.js "汉字"
+# 直接打开
+open writer/writer.html
 
-# 生成笔顺动画 HTML 页面
-node hanzi.js "汉字" --html
-
-# 获取拼音 + 生成动画页面
-node hanzi.js "汉字" --all
+# 或起本地 server（推荐）
+python3 -m http.server 8000
+# 访问 http://localhost:8000/writer/writer.html
 ```
 
-### 示例
+### iOS 开发者（Mac 端）
 
-```bash
-# 查询"爱"的拼音
-node hanzi.js "爱"
-# 输出:
-# 🔤 汉字: 爱
-# 📝 拼音: ài
+**先读 [`HANDOFF.md`](HANDOFF.md)**，所有该知道的都在那里。
 
-# 生成"学"字的笔顺动画
-node hanzi.js "学" --all
-# 输出:
-# 🔤 汉字: 学
-# 📝 拼音: xué
-# ✅ 已生成笔顺动画页面: 学.html
-```
+## 仓库结构
 
-## 📂 生成的文件
+| 目录 | 内容 |
+|------|------|
+| `writer/` | M0 重构后的 Web 笔顺测试页（参考实现） |
+| `vendor/` | hanzi-writer.min.js (3.5) + 9534 字字形数据（已本地化） |
+| `pinyin/` | 拼音字典（9531 单字 + 45816 词组） |
+| `archive/` | 历史 v1 Web 原型（已废弃，仅供回溯） |
+| `index.html` | GitHub Pages 入口（跳转到 writer/） |
 
-运行后会生成一个 HTML 文件，例如 `爱.html`。
+## 设计文档
 
-用浏览器打开这个文件，你会看到：
-
-- 🎨 **自动演示** - 页面加载后自动开始演示笔顺
-- ✍️ **练习书写** - 点击按钮跟着笔画练习书写
-- 🐌 **慢速模式** - 以较慢的速度演示每个笔画
-
-## 📱 使用效果预览
+详细 spec / PRD / 品牌决策 / 色板 / Logo 设计推理 全部在 Obsidian 笔记：
 
 ```
-┌─────────────────────────────┐
-│                             │
-│           爱                │
-│                             │
-│           ài                │
-│                             │
-│   ┌───────────────────┐    │
-│   │                   │    │
-│   │   [汉字书写区域]   │    │
-│   │                   │    │
-│   └───────────────────┘    │
-│                             │
-│   [🎨 显示笔顺] [✍️ 练习]   │
-│                             │
-└─────────────────────────────┘
+/Users/abc/Documents/obsidian/4-助理/hanzi-ios-mvp/
+  ├── PRD.md                  # 产品需求 v2
+  ├── BRAND-DECISION.md       # 命名 + Logo + ASO 决策
+  ├── COLOR-SYSTEM.md         # 色板规范
+  ├── ASR-RESEARCH.md         # 语音识别选型
+  ├── AppIcon.appiconset/     # 13 尺寸 iOS AppIcon
+  ├── tokens/                 # tokens.css + Colors.swift
+  └── prototype/              # 高保真 HTML 原型
 ```
 
-## 🎯 笔顺练习功能
+## 致谢
 
-在生成的 HTML 页面中，点击 **"练习书写"** 按钮后：
+- [hanzi-writer](https://chanind.github.io/hanzi-writer/) - 笔顺动画引擎
+- [hanzi-writer-data](https://github.com/chanind/hanzi-writer-data) - 字形数据（基于 [Make Me a Hanzi](https://www.skishore.me/makemeahanzi/)，Arphic PL License）
+- [pypinyin](https://github.com/mozillazg/python-pinyin) - 拼音词典数据源
 
-1. 用鼠标（或触摸屏）按照笔顺写字
-2. 如果写错了，会提示错误
-3. 写对了会自动进入下一笔
-4. 练习完成后会显示统计结果
+## License
 
-## 📦 依赖
-
-- **pinyin** - 拼音转换库
-- **hanzi-writer** - 汉字笔顺动画库（通过 CDN 引入）
-
-## 💡 扩展汉字库
-
-目前的笔画数据只包含常用汉字。如果需要添加更多汉字的笔顺数据，可以：
-
-1. 访问 [hanzi-writer.org](https://hanzi-writer.org/) 查询
-2. 或使用在线笔顺字典
-
-## 🎉 祝您学习愉快！
-
-如果有其他需求或问题，随时告诉我！🐂
+App 本身待定。第三方资源 License：
+- hanzi-writer: MIT
+- hanzi-writer-data / Make Me a Hanzi: GPLv3 + Arphic PL（需在 App 关于页展示）
+- pypinyin: MIT

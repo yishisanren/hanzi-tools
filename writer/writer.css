@@ -1,0 +1,151 @@
+/* ============================================================
+   会读会写 Read & Write — Web 笔顺测试页 writer.css
+   
+   只保留 hanzi-writer 渲染相关样式，所有视觉决策已迁至
+   品牌 tokens（4-助理/hanzi-ios-mvp/tokens/tokens.css），本文件
+   不重复定义品牌色，仅做技术层面的 layout。
+   
+   日期: 2026-06-06 (M0 重构)
+   ============================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; overflow-x: hidden; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+               "Noto Sans SC", "Helvetica Neue", sans-serif;
+  background: #F6F1E6;   /* 宣纸白 - 品牌 token --bg-primary */
+  color: #141414;         /* 主墨黑 - 品牌 token --ink-primary */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+h1 {
+  font-weight: 600;
+  font-size: 1.4rem;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+}
+h1 .en {
+  color: #7E766D;        /* --ink-tertiary */
+  font-weight: 400;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.container {
+  background: #FFFFFF;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(20, 20, 20, 0.08);
+  width: 100%;
+  max-width: 520px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+input {
+  flex: 1;
+  padding: 13px 16px;
+  font-size: 18px;
+  border: 1.5px solid #E0DAD0;   /* --stroke-divider */
+  border-radius: 12px;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+  transition: border-color 0.2s;
+}
+input:focus { border-color: #D93A2E; }   /* 朱砂红 */
+
+button.primary {
+  padding: 13px 22px;
+  font-size: 15px;
+  font-weight: 500;
+  background: #D93A2E;     /* 朱砂红 */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+button.primary:hover { background: #C43328; }
+button.primary:active { background: #AD2C22; }
+
+.result {
+  display: none;
+  text-align: center;
+}
+.result.active { display: block; }
+
+.pinyin {
+  font-size: 22px;
+  color: #D93A2E;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.canvases {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.char-cell {
+  width: 200px;
+  height: 200px;
+  border: 1.5px solid #E0DAD0;
+  border-radius: 12px;
+  background: #FAF7EC;
+}
+
+.controls {
+  display: none;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.controls.active { display: flex; }
+.controls button {
+  padding: 10px 16px;
+  font-size: 13px;
+  background: #FAF7EC;
+  color: #55504B;
+  border: 1px solid #E0DAD0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.controls button:hover { background: #EEE8DA; }
+
+.error {
+  color: #C62828;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.status {
+  margin-top: 18px;
+  padding: 10px 14px;
+  background: #FAF7EC;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #55504B;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.status.ok { color: #588157; }
+.status.error { color: #C62828; }
+
+@media (max-width: 420px) {
+  .input-group { flex-direction: column; }
+  button.primary { width: 100%; }
+  .char-cell { width: 160px; height: 160px; }
+}

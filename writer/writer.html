@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会读会写 · 离线测试页</title>
+<link rel="stylesheet" href="writer.css">
+<!-- 完全离线：从 vendor/ 加载 hanzi-writer 主 JS -->
+<script src="../vendor/hanzi-writer.min.js"></script>
+</head>
+<body>
+<h1>会读会写<span class="en">Read &amp; Write</span> · 离线测试</h1>
+
+<div class="container">
+  <div class="input-group">
+    <input type="text" id="charInput" placeholder="输入 1–4 个汉字..." value="学习" maxlength="4" inputmode="text">
+    <button class="primary" id="searchBtn">查询</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="pinyin" id="pinyin"></div>
+    <div class="canvases" id="canvases"></div>
+    <div class="controls" id="controls">
+      <button id="animateBtn">播放</button>
+      <button id="slowBtn">慢速</button>
+      <button id="quizBtn">练习</button>
+    </div>
+  </div>
+
+  <div class="status" id="status">初始化中...</div>
+</div>
+
+<script src="writer.js"></script>
+</body>
+</html>
